@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<project name="canvaShape" default="build.dev">
+    <loadproperties srcfile="build.properties" />
+    
+    <target name="init">
+        <echo>init</echo>
+        <mkdir dir="${build.dir}" />
+    </target>
+    
+    <target name="clean">
+        <echo>clean</echo>
+        <delete dir="${build.dir}" />
+    </target>
+    
+    <target name="concatenate">
+        <echo>concatenate</echo>
+        <loadfile property="license" srcfile="MIT-LICENSE.txt" />
+        <concat destfile="${build.dir}/build.js" fixlastline="yes" eol="lf">
+            <header trimleading="yes">/*!
+                ${license}
+                */
+            </header>
+            <fileset dir="${src.dir}" includes="**/*.js" />
+         </concat>
+    </target>
+    
+    <target name="minify">
+        <echo>minify</echo>
+        <apply executable="java" failonerror="true">
+            <fileset dir="${build.dir}" includes="*.js" />
+            <mapper type="glob" from="*.js" to="${build.dir}/*-min.js" />
+            
+            <arg line="-jar" />
+            <arg path="${yuimcompressor}" />
+            <arg line="${yuicompressor.options}" />
+            <srcfile />
+            
+            <arg line="-o" />
+            <targetfile />
+        </apply>
+    </target>    
+    
+    <target name="doc">
+        <echo>doc</echo>
+        <exec executable="yuidoc" failonerror="true">
+            <arg path="${src.dir}" />
+            <arg line="-o" />
+            <arg path="${yuidoc.output}" />
+        </exec>
+    </target>
+    
+    <target name="build.dev" depends="clean,init,concatenate">
+        <echo>develop</echo>
+    </target>
+    
+    <target name="build.int" depends="build.dev,minify">
+        <echo>int</echo>
+    </target>
+    
+    <target name="build.release" depends="build.int">
+        <echo>release</echo>
+    </target>  
+</project>
